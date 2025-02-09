@@ -2,6 +2,46 @@
 
 Fork of [wlroots/wlroots](https://gitlab.freedesktop.org/wlroots/wlroots)
 
+## Installation
+
+### Arch linux & derivatives
+
+Requirements: [yay](https://github.com/Jguer/yay) or another AUR helper
+
+Installing dependencies:
+```sh
+yay -Syu
+yay -S cairo git glslang hwdata libdisplay-info libdrm libglvnd libinput libliftoff libxkbcommon mesa meson pixman seatd wayland wayland-protocols
+```
+
+Downloading:
+```sh
+git clone --depth 1 https://github.com/JoCraft2010/flui.git
+cd flui
+```
+
+Building:
+```sh
+meson setup build
+ninja -C build
+```
+
+Installing:
+```sh
+sudo cp build/flui/flui /bin/flui
+sudo cp build/libwlroots-0.19.so /lib/libwlroots-0.19.sh
+```
+
+Running:
+```sh
+flui -s <command>
+```
+
+## Usage
+
+Switch between windows: Alt+Tab
+Exit flui: Alt+Esc
+
 # wlroots
 
 Pluggable, composable, unopinionated modules for building a [Wayland]
