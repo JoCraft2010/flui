@@ -2,7 +2,6 @@
 
 #include "layout.h"
 #include "server.h"
-#include "types/wlr_xdg_shell.h"
 
 /* Focus toplevel window (keyboard focus only) */
 void focus_toplevel(struct flui_toplevel *toplevel) {
