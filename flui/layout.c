@@ -150,15 +150,18 @@ static void xdg_toplevel_request_maximize(struct wl_listener *listener, void *da
 		wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, width, height);
 		wlr_scene_node_set_position(&toplevel->scene_tree->node, 0, 0);
 	}
+
 	wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
 /* Handle fullscreen requests from clients */
 static void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data) {
-	struct flui_toplevel *toplevel =
-	wl_container_of(listener, toplevel, request_fullscreen);
+	struct flui_toplevel *toplevel = wl_container_of(listener, toplevel, request_fullscreen);
 
 	if (!toplevel->xdg_toplevel->base->initialized) {
+		return;
+	}
+	if (toplevel->xdg_toplevel->current.fullscreen == toplevel->xdg_toplevel->requested.fullscreen) {
 		return;
 	}
 
