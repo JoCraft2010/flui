@@ -39,8 +39,8 @@ flui -s <command>
 
 ## Usage
 
-Switch between windows: Alt+Tab
-Exit flui: Alt+Esc
+- Switch between windows: Alt+Tab
+- Exit flui: Alt+Esc
 
 # wlroots
 
