@@ -2,6 +2,7 @@
 
 #include "layout.h"
 #include "server.h"
+#include "types/wlr_xdg_shell.h"
 
 /* Focus toplevel window (keyboard focus only) */
 void focus_toplevel(struct flui_toplevel *toplevel) {
@@ -153,13 +154,36 @@ static void xdg_toplevel_request_maximize(struct wl_listener *listener, void *da
 	wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
-/* Handle request fullscreen TODO */
+/* Handle fullscreen requests from clients */
 static void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data) {
 	struct flui_toplevel *toplevel =
 	wl_container_of(listener, toplevel, request_fullscreen);
-	if (toplevel->xdg_toplevel->base->initialized) {
-		wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+
+	if (!toplevel->xdg_toplevel->base->initialized) {
+		return;
 	}
+
+	struct wlr_surface_output *surf_output = wl_container_of(toplevel->xdg_toplevel->base->surface->current_outputs.next, surf_output, link);
+	struct wlr_output *output = surf_output->output;
+	int width, height;
+	wlr_output_effective_resolution(output, &width, &height);
+
+	if (width <= 0 || height <= 0) {
+		wlr_xdg_toplevel_set_fullscreen(toplevel->xdg_toplevel, false);
+		return;
+	}
+
+	if (toplevel->xdg_toplevel->pending.fullscreen) {
+		wlr_xdg_toplevel_set_fullscreen(toplevel->xdg_toplevel, false);
+		wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, width / 2, height / 2);
+		wlr_scene_node_set_position(&toplevel->scene_tree->node, width / 4, height / 4);
+	} else {
+		wlr_xdg_toplevel_set_fullscreen(toplevel->xdg_toplevel, true);
+		wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, width, height);
+		wlr_scene_node_set_position(&toplevel->scene_tree->node, 0, 0);
+	}
+
+	wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
 /* Handle creation of new toplevel (application window) */
