@@ -41,6 +41,7 @@ static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 	struct flui_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
 	wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
+	pointer_list_add_to_head(toplevel->server->sw_toplevels, toplevel);
 
 	focus_toplevel(toplevel);
 }

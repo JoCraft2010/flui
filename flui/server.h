@@ -22,6 +22,7 @@
 #include <xkbcommon/xkbcommon.h>
 
 #include "input.h"
+#include "util.h"
 
 #ifndef __flui_server_h
 #define __flui_server_h
@@ -38,6 +39,8 @@ struct flui_server {
 	struct wl_listener new_xdg_toplevel;
 	struct wl_listener new_xdg_popup;
 	struct wl_list toplevels;
+	struct pointer_list *sw_toplevels;
+	struct pl_node *sw_location;
 
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;

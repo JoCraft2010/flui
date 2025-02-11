@@ -27,6 +27,10 @@ struct flui_server server_setup(void) {
 	/* Create an output layout */
 	server.output_layout = wlr_output_layout_create(server.wl_display);
 
+	/* Create list of switchable toplevels */
+	server.sw_toplevels = create_pointer_list();
+	server.sw_location = NULL;
+
 	return server;
 }
 
@@ -55,4 +59,6 @@ void cleanup_server(struct flui_server *server) {
 	wlr_renderer_destroy(server->renderer);
 	wlr_backend_destroy(server->backend);
 	wl_display_destroy(server->wl_display);
+
+	destroy_pointer_list(server->sw_toplevels);
 }

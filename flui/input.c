@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include "input.h"
 #include "layout.h"
@@ -20,11 +21,17 @@ bool handle_keybinding(struct flui_server *server, xkb_keysym_t sym) {
 			break;
 		case XKB_KEY_Tab:
 			/* Cycle to the next toplevel */
-			if (wl_list_length(&server->toplevels) < 2) {
+			if (server->sw_toplevels->size < 2) {
 				break;
 			}
-			struct flui_toplevel *next_toplevel = wl_container_of(server->toplevels.prev, next_toplevel, link);
-			focus_toplevel(next_toplevel);
+			if (!server->sw_location) {
+				server->sw_location = server->sw_toplevels->head;
+			}
+			server->sw_location = server->sw_location->next;
+			if (!server->sw_location) {
+				server->sw_location = server->sw_toplevels->head;
+			}
+			focus_toplevel(server->sw_location->data);
 			break;
 		default:
 			return false;
@@ -43,6 +50,16 @@ void keyboard_handle_key(struct wl_listener *listener, void *data) {
 	/* Get a list of keysyms based on the keymap for this keyboard */
 	const xkb_keysym_t *syms;
 	int nsyms = xkb_state_key_get_syms(keyboard->wlr_keyboard->xkb_state, keycode, &syms);
+
+	for (int i = 0; i < nsyms; i++) {
+		xkb_keysym_t sym = syms[i];
+		if ((sym == XKB_KEY_Alt_L || sym == XKB_KEY_Alt_R) && event->state == WL_KEYBOARD_KEY_STATE_RELEASED && server->sw_location) {
+			struct flui_toplevel *t = server->sw_location->data;
+			assert(pointer_list_remove(server->sw_toplevels, t));
+			assert(pointer_list_add_to_head(server->sw_toplevels, t));
+			server->sw_location = NULL;
+		}
+	}
 
 	bool handled = false;
 	uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr_keyboard);
@@ -237,8 +254,7 @@ static void process_cursor_motion(struct flui_server *server, uint32_t time) {
 	double sx, sy;
 	struct wlr_seat *seat = server->seat;
 	struct wlr_surface *surface = NULL;
-	struct flui_toplevel *toplevel = desktop_toplevel_at(server,
-														 server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+	struct flui_toplevel *toplevel = desktop_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
 	if (!toplevel) {
 		wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
 	}
@@ -285,6 +301,8 @@ void server_cursor_button(struct wl_listener *listener, void *data) {
 		double sx, sy;
 		struct wlr_surface *surface = NULL;
 		struct flui_toplevel *toplevel = desktop_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+		assert(pointer_list_remove(server->sw_toplevels, toplevel));
+		assert(pointer_list_add_to_head(server->sw_toplevels, toplevel));
 		focus_toplevel(toplevel);
 	}
 }
