@@ -55,6 +55,7 @@ static void xdg_toplevel_unmap(struct wl_listener *listener, void *data) {
 		reset_cursor_mode(toplevel->server);
 	}
 
+	pointer_list_remove(toplevel->server->sw_toplevels, toplevel);
 	wl_list_remove(&toplevel->link);
 }
 
