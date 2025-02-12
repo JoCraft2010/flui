@@ -25,6 +25,7 @@
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
+#include "config.h"
 #include "input.h"
 #include "layout.h"
 #include "output.h"
@@ -49,6 +50,8 @@ int main(int argc, char *argv[]) {
 		printf("Usage: %s [-s startup command]\n", argv[0]);
 		return 0;
 	}
+
+	load_config();
 
 	struct flui_server server = server_setup();
 
