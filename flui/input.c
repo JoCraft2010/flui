@@ -55,8 +55,9 @@ void keyboard_handle_key(struct wl_listener *listener, void *data) {
 		xkb_keysym_t sym = syms[i];
 		if ((sym == XKB_KEY_Alt_L || sym == XKB_KEY_Alt_R) && event->state == WL_KEYBOARD_KEY_STATE_RELEASED && server->sw_location) {
 			struct flui_toplevel *t = server->sw_location->data;
-			assert(pointer_list_remove(server->sw_toplevels, t));
-			assert(pointer_list_add_to_head(server->sw_toplevels, t));
+			if (pointer_list_remove(server->sw_toplevels, t)) {
+				assert(pointer_list_add_to_head(server->sw_toplevels, t));
+			}
 			server->sw_location = NULL;
 		}
 	}
@@ -301,8 +302,9 @@ void server_cursor_button(struct wl_listener *listener, void *data) {
 		double sx, sy;
 		struct wlr_surface *surface = NULL;
 		struct flui_toplevel *toplevel = desktop_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
-		assert(pointer_list_remove(server->sw_toplevels, toplevel));
-		assert(pointer_list_add_to_head(server->sw_toplevels, toplevel));
+		if (pointer_list_remove(server->sw_toplevels, toplevel)) {
+			assert(pointer_list_add_to_head(server->sw_toplevels, toplevel));
+		}
 		focus_toplevel(toplevel);
 	}
 }
